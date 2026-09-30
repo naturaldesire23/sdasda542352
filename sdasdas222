@@ -2831,9 +2831,17 @@ function Window.Open(cfg)
 end
 
 UI.Window = Window.Open
-UI.Notify = Notify.Push
-UI.Notify.SetPosition = Notify.SetPosition
-UI.Notify.GetPosition = function() return Notify.Position end
+
+-- Notify is both callable and has methods
+local notifyCallable = setmetatable({}, {
+    __call = function(_, arg) return Notify.Push(arg) end,
+    __index = function(_, key)
+        if key == "SetPosition" then return Notify.SetPosition end
+        if key == "GetPosition" then return function() return Notify.Position end end
+        return nil
+    end,
+})
+UI.Notify = notifyCallable
 
 --============================================================
 -- Public init
